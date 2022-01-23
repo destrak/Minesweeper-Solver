@@ -8,10 +8,10 @@ class Game:
 
     # Конструктор
     def __init__(self,
-                 height=500,
-                 width=500,
-                 cell_size=50,
-                 bomb_number=10,
+                 height=900,
+                 width=900,
+                 cell_size=90,
+                 bomb_number=20,
                  fps=60,
                  saved_field=None
                  ):
@@ -40,6 +40,8 @@ class Game:
         self.colors = ['lightcyan', 'lightcoral', 'yellow1',
                        'mediumpurple1', 'midnightblue', 'mistyrose4',
                        'salmon4', 'sienna1', 'thistle4']
+
+        self.font_size = cell_size // 3
 
     # Отрисовка сетки
     def DrawGrid(self):
@@ -71,7 +73,7 @@ class Game:
         bias = self.cell_size
         player_field = self.field.Render()
         pygame.font.init()
-        font_renderer = pygame.font.SysFont('courier', 16)
+        font_renderer = pygame.font.SysFont('courier', self.font_size)
         for i in range(self.cell_height):
             for j in range(self.cell_width):
                 self.DrawRect(bias, i, j, 'gray')
@@ -99,7 +101,8 @@ class Game:
 
                 self.surface.blit(
                     label,
-                    (j * bias + bias // 2 - 4, i * bias + bias // 2 - 8)
+                    (j * bias + bias // 2 - self.font_size // 4,
+                     i * bias + bias // 2 - self.font_size // 2)
                 )
 
     # Закончилась ли игра

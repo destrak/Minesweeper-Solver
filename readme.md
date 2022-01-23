@@ -1,50 +1,52 @@
-# Бот для игры "Сапер"
+# Minesweeper Solver
 
-## Возможности
-Параметры игры задаются в конструкторе класса `Game`:
-- `height` - высота поля в пикселях;
-- `width` - ширина поля в пикселях;
-- `cell_size` - размер клетки в пикселях
-- `bomb_number` - число бомб;
-- `fps` - количество кадров в секунду;
-- `saved_field` - сохраненное поле, по умолчанию None.
+## Game features
 
-Команды:
-- Открыть клетку - `ЛКМ`;
-- Пометить клетку - `ПКМ`.
+Game parameters are set in the constructor of the `Game` class:
+- `height` - the height of the field in pixels;
+- `width` - width of the field in pixels;
+- `cell_size` - size of the cell in pixels
+- `bomb_number` - number of bombs;
+- `fps` - number of frames per second;
+- `saved_field` - saved field, by default None.
 
-Игра автоматически сохраняется после закрытия интерфейса в файл `data.pickle`. Перед 
-игрой 
-пользователю в 
-консоли предлагается два формата игры:
-- `Regular` - обычная игра;
-- `Solver` - запуск бота.
+**Commands:**
+- To open a cell - `LMB`;
+- To mark a cell - `RMB`.
 
-Класс `Solver` принимает на вход видимое поле.
+To start the game you need to run the script `main.py`. Two game formats are offered:
 
-## Логика игры бота
+- **Regular** is a regular game;
 
-Алгоритм был взят из этой статьи: [Хабр](https://habr.com/ru/post/211188/).
+<img src="/regular.gif"/>
 
-Основная идея заключается в расчете вероятности нахождения бомбы в каждой клетке поля, 
-исходя из уже открытых клеток. Для начала считаем вероятности для отдельных клеток, 
-в результате этого в одной клетке могут оказаться несколько вероятностей как следствие 
-влияния нескольких клеток, смежных друг с другом. Для вычисления вероятности 
-нахождения мины в ячейке рядом с несколькими открытыми ячейками используем формулу
-расчета вероятности хотя бы одного события: вероятность наступления события `А`, 
-состоящего в появлении хотя бы одного из событий `А1, А2,..., An`, независимых в 
-совокупности, равна разности между единицей и произведением вероятностей противоположных 
-событий:
+- **Solver** - launches the solver. The `Solver` class takes a visible field as input.
 
-`А = 1 - (1 - A1) * (1 - A2) * ... * (1 - An)`. 
+<img src="/solver.gif" title="Solver"/>
 
-Однако следует помнить, что 
-сумма вероятностей в каждой группе ячеек должна быть равна количеству мин в группе.  
-Поэтому все значения в каждой группе нужно домножить так, чтобы в итоге их сумма была 
-равна числу мин. Это число равно количеству мин в группе, деленное на текущую сумму 
-вероятностей ячеек группы. Подобный расчет для второй группы проводим уже с учетом 
-корректировки от предыдущей. После этого вероятность в общих ячейках снова изменится, 
-поэтому подобное уравнивание для каждой группы нужно повторить несколько раз, пока 
-система не придет к некоторым стабильным значениям, которые и будут истинными
-вероятностями нахождения мин в ячейках. Остается только выбрать одну из ячеек с 
-минимальной вероятностью и сделать ход.
+The game is automatically saved after closing the interface in the `data.pickle` file.
+
+## Solver logic
+
+The main idea is to calculate the probability of finding a bomb in each cell of the field, 
+based on the already open cells. To start with, we calculate the probabilities for
+individual cells, which may result in several probabilities in the same cell as a 
+consequence of the influence of several cells adjacent to each other. To calculate the 
+probability of finding a mine in a cell adjacent to several open cells, we use the formula
+for calculating the probability of at least one event: the probability of the 
+occurrence of the event `A`, consisting in the occurrence of at least one of the 
+events `A1, A2,..., An`, independent  in together, is equal to the difference between 
+one and the product of the probabilities of the opposite events:
+
+`A = 1 - (1 - A1) * (1 - A2) * ... * (1 - An)`. 
+
+However, it should be remembered that the sum of probabilities in each group of cells
+must be equal to the number of mines in the group. Therefore, all values in each group 
+must be multiplied so that their sum is finally is equal to the number of mines. This
+number is equal to the number of mines in the group divided by the current sum of
+cells in the group. A similar calculation for the second group is performed already 
+taking  into account corrections from the previous one. After that the probability in 
+common cells will change again, so similar equalization for each group should be 
+repeated several times, until system arrives at some stable values, which will be true 
+probabilities of finding mines in cells. It remains only to choose one of the cells 
+with minimum probability and make a move.
