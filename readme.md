@@ -18,11 +18,11 @@ To start the game you need to run the script `main.py`. Two game formats are off
 
 - **Regular** is a regular game;
 
-<img src="/regular.gif"/>
+![](img/regular.gif)
 
 - **Solver** - launches the solver. The `Solver` class takes a visible field as input.
 
-<img src="/solver.gif" title="Solver"/>
+![](img/solver.gif)
 
 The game is automatically saved after closing the interface in the `data.pickle` file.
 
