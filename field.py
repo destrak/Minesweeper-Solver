@@ -1,105 +1,95 @@
+from cell import Cell
 import random
 import sys
+
 sys.setrecursionlimit(10000)
 
 
 class Field:
-    # Конструктор поля
-    def __init__(self, h, w, n):
+
+    def __init__(self, h=10, w=10, n=10):
         self.height = h
         self.width = w
         self.bombs = n
         self.field = self.MakeNewField()
         self.AssignValues()
-        self.revealed = set()
-        self.flagged = set()
 
-    # Генерация поля
+        self.unrevealed_sign = '-'
+        self.bomb_sign = '*'
+        self.flag_sign = 'F'
+
     def MakeNewField(self):
         field = [
-            [0 for _ in range(self.width)]
-            for _ in range(self.height)
+            [Cell() for _ in range(self.width)] for _ in range(self.height)
         ]
-
         counter = 0
-
         while counter < self.bombs:
             x = random.randint(0, self.height - 1)
             y = random.randint(0, self.width - 1)
-            if field[x][y] == '*':
+            if field[x][y].IsBomb():
                 continue
-            field[x][y] = '*'
+            field[x][y].MakeBomb()
             counter += 1
-
         return field
 
-    # Проверка на выход за границы поля
-    def OutBorder(self, x, y):
+    def GetSize(self):
+        return self.height, self.width
+
+    def IsOutBorder(self, x, y):
         return x < 0 or y < 0 or x >= self.height or y >= self.width
 
-    # Количество бомб в окружении
     def NeighborCounter(self, x, y):
         counter = 0
         for offset_x in range(-1, 2):
             for offset_y in range(-1, 2):
-                if not self.OutBorder(x + offset_x, y + offset_y):
-                    if self.field[x + offset_x][y + offset_y] == '*':
+                if not self.IsOutBorder(x + offset_x, y + offset_y):
+                    if self.field[x + offset_x][y + offset_y].IsBomb():
                         counter += 1
         return counter
 
-    # Присваивание значений клеткам
     def AssignValues(self):
         for x in range(self.height):
             for y in range(self.width):
-                if self.field[x][y] == '*':
+                if self.field[x][y].IsBomb():
                     continue
-                self.field[x][y] = self.NeighborCounter(x, y)
+                n = self.NeighborCounter(x, y)
+                self.field[x][y].ChangeValue(n)
 
-    # Открыть клетку
-    def Reveal(self, x, y) -> bool:
-        self.revealed.add((x, y))
-        if self.field[x][y] == '*':
+    def RevealCell(self, x, y) -> bool:
+        self.field[x][y].Reveal()
+        if self.field[x][y].IsBomb():
             return False
-        elif int(self.field[x][y]) > 0:
+        elif self.field[x][y].GetValue() > 0:
             return True
         for offset_x in range(-1, 2):
             for offset_y in range(-1, 2):
-                if not self.OutBorder(x + offset_x, y + offset_y):
-                    if (x + offset_x, y + offset_y) in self.revealed:
+                if not self.IsOutBorder(x + offset_x, y + offset_y):
+                    if self.field[x + offset_x][y + offset_y].IsRevealed():
                         continue
-                    self.Reveal(x + offset_x, y + offset_y)
+                    self.RevealCell(x + offset_x, y + offset_y)
         return True
 
-    # Пометить клетку
-    def Flag(self, x, y):
-        if (x, y) not in self.flagged:
-            self.flagged.add((x, y))
-        else:
-            self.flagged.remove((x, y))
-
-    # Состояние клетки
-    def GetState(self, x, y):
-        return self.field[x][y]
-
-    # Список открытых клеток
-    def GetRevealed(self) -> set:
-        return self.revealed
-
-    # Размер поля
-    def GetSize(self):
-        return self.height, self.width
-
-    # Поле
-    def GetField(self) -> list:
-        return self.field
-
-    # Генерация поля для пользователя
-    def Render(self) -> list:
-        visible_field = [['-' for _ in range(self.width)] for _ in range(self.height)]
+    def GetRevealedCells(self) -> set:
+        revealed = set()
         for x in range(self.height):
             for y in range(self.width):
-                if (x, y) in self.revealed:
-                    visible_field[x][y] = self.field[x][y]
-                elif (x, y) in self.flagged:
-                    visible_field[x][y] = 'F'
+                if self.field[x][y].IsRevealed():
+                    revealed.add((x, y))
+        return revealed
+
+    def FlagCell(self, x, y):
+        self.field[x][y].Flag()
+
+    def Render(self) -> list:
+        visible_field = [
+            [self.unrevealed_sign for _ in range(self.width)] for _ in range(self.height)
+        ]
+        for x in range(self.height):
+            for y in range(self.width):
+                if self.field[x][y].IsRevealed():
+                    visible_field[x][y] = self.field[x][y].GetValue()
+                    if self.field[x][y].IsBomb():
+                        visible_field[x][y] = self.bomb_sign
+                elif self.field[x][y].IsFlagged():
+                    visible_field[x][y] = self.flag_sign
         return visible_field

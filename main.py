@@ -24,21 +24,20 @@ def SaveCheck() -> bool:
         return False
 
 
-# Запуск
-print('\n', end="")
-print('Choose game type:')
-print("[Input] Regular | Solver >> ", end="")
-answer = input()
-if answer == 'Regular':
-    if SaveCheck():
-        with open('data.pickle', 'rb') as file:
-            save = pickle.load(file)
-            minesweeper = Game(saved_field=save)
+if __name__ == "__main__":
+    print('\n', end="")
+    print('Choose game type:')
+    print("[Input] Regular | Solver >> ", end="")
+    answer = input()
+    if answer == 'Regular':
+        if SaveCheck():
+            with open('data.pickle', 'rb') as file:
+                save = pickle.load(file)
+                minesweeper = Game(saved_field=save)
+        else:
+            minesweeper = Game()
+        minesweeper.Run()
+        minesweeper.MakeSave()
     else:
-        minesweeper = Game()
-    minesweeper.Run()
-    minesweeper.MakeSave()
-else:
-    minesweeper = Game(fps=5)
-    minesweeper.RunSolved()
-
+        minesweeper = Game(fps=10)
+        minesweeper.RunSolved()

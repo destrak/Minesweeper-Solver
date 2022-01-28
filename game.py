@@ -6,15 +6,15 @@ from solver import Solver
 
 class Game:
 
-    # Конструктор
-    def __init__(self,
-                 height=900,
-                 width=900,
-                 cell_size=90,
-                 bomb_number=20,
-                 fps=60,
-                 saved_field=None
-                 ):
+    def __init__(
+            self,
+            height=900,
+            width=900,
+            cell_size=45,
+            bomb_number=30,
+            fps=60,
+            saved_field=None
+    ):
 
         self.width = width
         self.height = height
@@ -37,13 +37,14 @@ class Game:
 
         self.game_is_over_ = False
 
-        self.colors = ['lightcyan', 'lightcoral', 'yellow1',
-                       'mediumpurple1', 'midnightblue', 'mistyrose4',
-                       'salmon4', 'sienna1', 'thistle4']
+        self.colors = [
+            'lightcyan', 'lightcoral', 'yellow1',
+            'mediumpurple1', 'midnightblue', 'mistyrose4',
+            'salmon4', 'sienna1', 'thistle4'
+        ]
 
         self.font_size = cell_size // 3
 
-    # Отрисовка сетки
     def DrawGrid(self):
         for x in range(0, self.width, self.cell_size):
             pygame.draw.line(
@@ -60,7 +61,6 @@ class Game:
                 (self.width, y)
             )
 
-    # Заливка клеток
     def DrawRect(self, bias, x, y, color):
         pygame.draw.rect(
             self.surface,
@@ -68,7 +68,6 @@ class Game:
             (y * bias + 1, x * bias + 1, bias - 1, bias - 1)
         )
 
-    # Отрисовка клеток
     def DrawCells(self):
         bias = self.cell_size
         player_field = self.field.Render()
@@ -105,17 +104,15 @@ class Game:
                      i * bias + bias // 2 - self.font_size // 2)
                 )
 
-    # Закончилась ли игра
     def GameIsOver(self) -> bool:
         height, width = self.field.GetSize()
-        revealed = self.field.GetRevealed()
+        revealed = self.field.GetRevealedCells()
         if len(revealed) >= height * width - self.bomb_number:
             self.game_is_over_ = True
             return True
         else:
             return False
 
-    # Запуск без решения
     def Run(self):
         pygame.init()
         clock = pygame.time.Clock()
@@ -133,7 +130,7 @@ class Game:
                             pos[1] // self.cell_size,
                             pos[0] // self.cell_size,
                         ]
-                        passed = self.field.Reveal(x, y)
+                        passed = self.field.RevealCell(x, y)
                         if not passed:
                             condition = False
                             self.game_is_over_ = True
@@ -143,7 +140,7 @@ class Game:
                             pos[1] // self.cell_size,
                             pos[0] // self.cell_size,
                         ]
-                        self.field.Flag(x, y)
+                        self.field.FlagCell(x, y)
             self.DrawGrid()
             self.DrawCells()
             pygame.display.update()
@@ -152,9 +149,8 @@ class Game:
                 condition = False
         pygame.quit()
 
-    # Запуск с решением
     def RunSolved(self):
-        self.field.Reveal(0, 0)
+        self.field.RevealCell(0, 0)
         condition = True
         clock = pygame.time.Clock()
         pygame.display.set_caption('Minesweeper')
@@ -170,7 +166,7 @@ class Game:
             solver.Run()
             prediction = solver.MakePrediction()
             x, y = prediction[0], prediction[1]
-            passed = self.field.Reveal(x, y)
+            passed = self.field.RevealCell(x, y)
             if not passed:
                 condition = False
                 self.game_is_over_ = True
@@ -181,7 +177,6 @@ class Game:
             if self.GameIsOver():
                 condition = False
 
-    # Сохранение поля
     def MakeSave(self):
         if self.game_is_over_:
             f = open('data.pickle', 'rb')
