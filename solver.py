@@ -1,14 +1,18 @@
 class Solver:
 
-    # Конструктор помощника
-    def __init__(self, field, h, w):
+    def __init__(
+            self,
+            field,
+            height,
+            width
+    ):
+
         self.field = field
-        self.height = h
-        self.width = w
+        self.height = height
+        self.width = width
         self.prob_dict = dict()
 
-    # Запуск помощника
-    def Run(self) -> bool:
+    def Run(self):
         self.MakeProbDict()
         self.CorrectProbDict()
         self.CorrectTotalProb()
@@ -22,11 +26,9 @@ class Solver:
             prev = cur
         return len(self.prob_dict) > 0
 
-    # Проверка на выход за границы поля
-    def OutBorder(self, x, y) -> bool:
+    def OutBorder(self, x, y):
         return x < 0 or y < 0 or x >= self.height or y >= self.width
 
-    # Список координат лежащих рядом клеток
     def NearCellList(self, x, y):
         ans = []
         for offset_x in range(-1, 2):
@@ -36,7 +38,6 @@ class Solver:
                         ans.append((x + offset_x, y + offset_y))
         return ans
 
-    # Создание словаря вероятностей: {координаты клетки: вероятность бомбы в этой клетке}
     def MakeProbDict(self):
         for x in range(self.height):
             for y in range(self.width):
@@ -50,8 +51,7 @@ class Solver:
                                 self.prob_dict[element[0]] = []
                             self.prob_dict[element[0]].append(element[1])
 
-    # Вероятность бомбы в лежащих рядом клетках
-    def NearProb(self, x, y) -> list:
+    def NearProb(self, x, y):
         s = []
         n = len(self.NearCellList(x, y))
         for offset_x in range(-1, 2):
@@ -62,7 +62,6 @@ class Solver:
                         s.append([(x + offset_x, y + offset_y), prob])
         return s
 
-    # Корректировка вероятности клеток, которые лежат в пересечении
     def CorrectProbDict(self):
         for element in self.prob_dict:
             p = 1
@@ -71,7 +70,6 @@ class Solver:
             p = 1 - p
             self.prob_dict[element] = [p]
 
-    # Корректировка вероятностей, пока разница не станет меньше eps
     def CorrectTotalProb(self):
         for x in range(self.height):
             for y in range(self.width):
@@ -88,14 +86,13 @@ class Solver:
                             r = self.prob_dict[element][0]
                             self.prob_dict[element] = [r * s]
 
-    # Проверка на точность
-    def AccuracyCheck(self, l1, l2, eps):
+    @staticmethod
+    def AccuracyCheck(l1, l2, eps):
         for i in range(len(l1)):
             if l2[i] - l1[i] > eps:
                 return False
         return True
 
-    # Выбор наилучшего хода
     def MakePrediction(self):
         minimum = 1.0
         cords = (0, 0)

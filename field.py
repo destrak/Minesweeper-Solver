@@ -1,16 +1,21 @@
 from cell import Cell
 import random
 import sys
-
 sys.setrecursionlimit(10000)
 
 
 class Field:
 
-    def __init__(self, h=10, w=10, n=10):
-        self.height = h
-        self.width = w
-        self.bombs = n
+    def __init__(
+            self,
+            height,
+            width,
+            bomb_number
+    ):
+
+        self.height = height
+        self.width = width
+        self.bombs = bomb_number
         self.field = self.MakeNewField()
         self.AssignValues()
 
@@ -55,7 +60,7 @@ class Field:
                 n = self.NeighborCounter(x, y)
                 self.field[x][y].ChangeValue(n)
 
-    def RevealCell(self, x, y) -> bool:
+    def RevealCell(self, x, y):
         self.field[x][y].Reveal()
         if self.field[x][y].IsBomb():
             return False
@@ -69,7 +74,7 @@ class Field:
                     self.RevealCell(x + offset_x, y + offset_y)
         return True
 
-    def GetRevealedCells(self) -> set:
+    def GetRevealedCells(self):
         revealed = set()
         for x in range(self.height):
             for y in range(self.width):
@@ -80,7 +85,7 @@ class Field:
     def FlagCell(self, x, y):
         self.field[x][y].Flag()
 
-    def Render(self) -> list:
+    def Render(self):
         visible_field = [
             [self.unrevealed_sign for _ in range(self.width)] for _ in range(self.height)
         ]

@@ -1,16 +1,20 @@
 class Cell:
 
-    def __init__(self, bomb=False):
+    def __init__(
+            self,
+            bomb=False
+    ):
+
         self.revealed = False
         self.flagged = False
         self.bomb = bomb
         self.val = 0
 
     def Reveal(self):
-        self.revealed = not self.revealed
+        self.revealed = True
 
     def Flag(self):
-        self.revealed = not self.flagged
+        self.flagged = not self.flagged
 
     def MakeBomb(self):
         self.bomb = not self.bomb

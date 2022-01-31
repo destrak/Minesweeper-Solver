@@ -1,20 +1,28 @@
 # Minesweeper Solver
 
+## How to run
+
+Run `gui.py`.
+
 ## Game features
 
-Game parameters are set in the constructor of the `Game` class:
+
+### Main information
+Game parameters are set in the constructor of the `GUI` class:
 - `height` - the height of the field in pixels;
 - `width` - width of the field in pixels;
 - `cell_size` - size of the cell in pixels
 - `bomb_number` - number of bombs;
 - `fps` - number of frames per second;
-- `saved_field` - saved field, by default None.
 
-**Commands:**
-- To open a cell - `LMB`;
-- To mark a cell - `RMB`.
+**Commands**:
+- Open a cell - `LMB`;
+- Mark a cell - `RMB`;
+- Return to menu - `ESC`.
 
-To start the game you need to run the script `main.py`. Two game formats are offered:
+
+### Game modes
+Two game formats are offered:
 
 - **Regular** is a regular game;
 
