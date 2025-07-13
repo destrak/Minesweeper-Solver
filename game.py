@@ -1,21 +1,14 @@
 import pickle
 from field import Field
 from solver import Solver
-
+from EnhancedSolver import EnhancedSolver
 
 class Game:
-
-    def __init__(
-            self,
-            height,
-            width,
-            bomb_number,
-            saved_field=None
-    ):
-
+    def __init__(self, height, width, bomb_number, saved_field=None, use_enhanced_solver=False):
         self.width = width
         self.height = height
         self.bomb_number = bomb_number
+        self.use_enhanced_solver = use_enhanced_solver
         self.game_is_over_ = False
 
         if saved_field is None:
@@ -39,13 +32,35 @@ class Game:
             self.field.FlagCell(x, y)
         return True
 
-    def NextSolved(self):
+    def NextSolved(self, stats=None):
         r = self.field.Render()
         height, width = self.field.GetSize()
-        solver = Solver(r, height, width)
+
+        # ✔ Aquí corregimos: pasamos el objeto stats solo si Enhanced lo admite
+        if self.use_enhanced_solver:
+            solver = EnhancedSolver(r, height, width)
+        else:
+            solver = Solver(r, height, width)
+
         solver.Run()
-        prediction = solver.MakePrediction()
-        x, y = prediction[0], prediction[1]
+
+        # Elegimos la jugada
+        if hasattr(solver, "MakeSafeMoves"):
+            safe_moves = solver.MakeSafeMoves()
+            if safe_moves:
+                x, y = safe_moves[0]
+                prob = solver.prob_dict.get((x, y), [0.0])[0]  # ✔ Si es safe, usamos 0.0
+            else:
+                x, y = solver.MakePrediction()
+                prob = solver.prob_dict.get((x, y), [1.0])[0]  # ❗ Esto puede ser alto
+        else:
+            x, y = solver.MakePrediction()
+            prob = solver.prob_dict.get((x, y), [1.0])[0]
+
+        # ✔ Registramos la probabilidad real usada en el movimiento
+        if stats:
+            stats.register_move(prob)
+
         passed = self.field.RevealCell(x, y)
         if not passed:
             self.game_is_over_ = True
@@ -53,20 +68,19 @@ class Game:
         return True
 
     def GameIsOver(self):
+        if self.game_is_over_:
+            return False
         height, width = self.field.GetSize()
         revealed = self.field.GetRevealedCells()
         if len(revealed) >= height * width - self.bomb_number:
             self.game_is_over_ = True
             return True
-        else:
-            return False
+        return False
 
     def MakeSave(self, filename, game_is_over=False):
         if game_is_over:
-            f = open(filename, 'wb')
-            f.close()
+            with open(filename, 'wb') as f:
+                pass
         else:
-            field = self.field
-            f = open(filename, 'wb')
-            pickle.dump(field, f)
-            f.close()
+            with open(filename, 'wb') as f:
+                pickle.dump(self.field, f)

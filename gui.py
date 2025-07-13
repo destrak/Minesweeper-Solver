@@ -5,16 +5,16 @@ import time
 import os
 import pickle
 from game import Game
-
+import time
 
 class GUI:
 
     def __init__(
             self,
-            height=500,
-            width=500,
+            height=800,
+            width=800,
             cell_size=50,
-            bomb_number=10,
+            bomb_number=40,
             fps=60
     ):
 
@@ -270,25 +270,72 @@ class GUI:
 
     def SolvedGame(self):
         pygame.display.set_caption('Solver')
-        self.surface.fill(pygame.Color('dimgray'))
+
+        # Menú de selección de tipo de solver
         condition = True
-        self.game.RevealFirstCell()
+        selected_solver = False  # Por defecto: Solver clásico
+
         while condition:
+            self.surface.fill(pygame.Color('dimgray'))
+            self.DrawText('Selecciona el Solver', 'white', 100, 50)
+
+            button_classic = self.DrawButton(
+                50, 100, self.button_width, self.button_height, 'lightblue'
+            )
+            button_enhanced = self.DrawButton(
+                50, 200, self.button_width, self.button_height, 'lightgreen'
+            )
+
+            self.DrawText('Solver clásico', 'black', 50, 100, self.button_width, self.button_height)
+            self.DrawText('EnhancedSolver', 'black', 50, 200, self.button_width, self.button_height)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    sys.exit()
+                    condition = False
+                    return  # Salir del método limpio
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mx, my = pygame.mouse.get_pos()
+                    if button_classic.collidepoint((mx, my)):
+                        selected_solver = False
+                        condition = False
+                    if button_enhanced.collidepoint((mx, my)):
+                        selected_solver = True
+                        condition = False
+
+            pygame.display.update()
+            self.clock.tick(self.fps)
+
+        # Inicializa el juego con el solver elegido
+        self.game = Game(self.cell_height, self.cell_width, self.bomb_number, use_enhanced_solver=selected_solver)
+        self.surface.fill(pygame.Color('dimgray'))
+        self.game.RevealFirstCell()
+
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                    return  # Salida segura
+
             passed = self.game.NextSolved()
+
             if not passed:
-                condition = False
+                running = False
+                continue  # No seguir actualizando si perdió
+
+            time.sleep(0.3)
+            self.clock.tick(1)
+
             self.DrawGrid()
             self.DrawCells(self.game.GetPlayerField())
             pygame.display.update()
-            self.clock.tick(self.fps // 5)
-            if self.game.GameIsOver():
-                condition = False
 
-    @staticmethod
-    def GameInProgress():
+            if self.game.GameIsOver():
+                running = False
+
+
+@staticmethod
+def GameInProgress():
         try:
             if os.stat('data.pickle').st_size > 0:
                 return True

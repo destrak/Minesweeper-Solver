@@ -1,26 +1,23 @@
+# --- Solver.py ---
+
 class Solver:
-
-    def __init__(
-            self,
-            field,
-            height,
-            width
-    ):
-
+    def __init__(self, field, height, width, stats=None):
         self.field = field
         self.height = height
         self.width = width
         self.prob_dict = dict()
+        self.stats = stats  # Agregado
+
 
     def Run(self):
         self.MakeProbDict()
         self.CorrectProbDict()
         self.CorrectTotalProb()
-        prev = [element[0] for element in self.prob_dict]
+        prev = [self.prob_dict[key][0] for key in self.prob_dict]
         eps = 0.01
         while True:
             self.CorrectTotalProb()
-            cur = [element[0] for element in self.prob_dict]
+            cur = [self.prob_dict[key][0] for key in self.prob_dict]
             if self.AccuracyCheck(prev, cur, eps):
                 break
             prev = cur
@@ -89,7 +86,7 @@ class Solver:
     @staticmethod
     def AccuracyCheck(l1, l2, eps):
         for i in range(len(l1)):
-            if l2[i] - l1[i] > eps:
+            if abs(l2[i] - l1[i]) > eps:
                 return False
         return True
 
@@ -100,4 +97,17 @@ class Solver:
             if self.prob_dict[key][0] <= minimum:
                 minimum = self.prob_dict[key][0]
                 cords = key
+        if self.stats:
+            self.stats.register_move(minimum)
         return cords
+    def MakeSafeMoves(self):
+        if not self.prob_dict:
+            return []
+        min_prob = min([p[0] for p in self.prob_dict.values()])
+        tolerance = 0.02  # Mismo criterio que EnhancedSolver
+        safe_candidates = [cell for cell, prob in self.prob_dict.items() if prob[0] <= min_prob + tolerance]
+        safe_candidates.sort(key=lambda c: self.prob_dict[c][0])  # Ordenar por menor probabilidad
+        return safe_candidates
+
+
+
