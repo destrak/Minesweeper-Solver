@@ -107,6 +107,11 @@ class Solver:
         tolerance = 0.02  # Mismo criterio que EnhancedSolver
         safe_candidates = [cell for cell, prob in self.prob_dict.items() if prob[0] <= min_prob + tolerance]
         safe_candidates.sort(key=lambda c: self.prob_dict[c][0])  # Ordenar por menor probabilidad
+
+        # 🔍 Registrar la jugada si se están guardando estadísticas
+        if self.stats and safe_candidates:
+            self.stats.register_move(self.prob_dict[safe_candidates[0]][0])
+
         return safe_candidates
 
 

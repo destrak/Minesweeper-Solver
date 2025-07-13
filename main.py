@@ -7,7 +7,7 @@ import copy
 # 🎯 Parámetros editables en un solo lugar
 HEIGHT = 16
 WIDTH = 16
-BOMBS = 40
+BOMBS = 20
 PARTIDAS = 100
 
 def run_comparativa_solvers(n_partidas, output_filename_clasico, output_filename_enhanced):

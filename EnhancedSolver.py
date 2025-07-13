@@ -200,6 +200,6 @@ class EnhancedSolver:
         safe_candidates = [cell for cell, prob in self.prob_dict.items() if prob[0] <= min_prob + tolerance]
         safe_candidates.sort(key=lambda c: (self.prob_dict[c][0], self.entropy_score(*c)))
         if self.stats and safe_candidates:
-            for cell in safe_candidates:
-             self.stats.register_move(self.prob_dict[cell][0])  # ← Añadido
+            if safe_candidates:
+                self.stats.register_move(self.prob_dict[safe_candidates[0]][0])
         return safe_candidates
